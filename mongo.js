@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
-const MONGO_URL =
-  "mongodb+srv://admin:QRWaLPEBNOHPUC7Z@cluster0.qui8bja.mongodb.net/";
+import dotenv from "dotenv";
+dotenv.config();
+const password = process.env.password;
+const MONGO_URL = `mongodb+srv://admin:${password}@cluster0.qui8bja.mongodb.net/`;
 mongoose
   .connect(MONGO_URL, {
     retryWrites: true,

@@ -1,10 +1,14 @@
 import axios from "axios";
-import * as cheerio from "cheerio";
+import fs from "fs";
 import mongoose from "mongoose";
 
+import dotenv from "dotenv";
+dotenv.config();
+const password = process.env.password;
+
 //MongoDB 스키마에 넣기
-const MONGO_URL =
-  "mongodb+srv://admin:QRWaLPEBNOHPUC7Z@cluster0.qui8bja.mongodb.net/movie";
+
+const MONGO_URL = `mongodb+srv://admin:${password}@cluster0.qui8bja.mongodb.net/`;
 mongoose
   .connect(MONGO_URL, {
     retryWrites: true,
@@ -33,7 +37,7 @@ const Watcha = mongoose.model("Watcha", WatchaSchema);
 
 async function fetchPage() {
   const url =
-    "https://pedia.watcha.com/api/staffmades/278/contents?page=3&size=50";
+    "https://pedia.watcha.com/api/staffmades/278/contents?page=1&size=50";
   try {
     const response = await axios.get(
       url,
@@ -48,45 +52,21 @@ async function fetchPage() {
           "X-Frograms-App-Code": "Galaxy",
           "X-Frograms-Client": "Galaxy-Web-App",
           "X-Frograms-Version": "2.1.0",
+          "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,de;q=0.6",
+          "X-Frograms-Galaxy-Region": "KR",
+          "X-Frograms-Version": "2.1.0",
+          "X-Watcha-Client-Language": "ko",
+          "X-Watcha-Client-Region": "KR",
+          "X-Watcha-Remote-Addr": "1.231.165.73",
+          "X-Frograms-Galaxy-Language": "ko",
         },
       }
     );
     const data = response.data;
-    console.log(data);
+    const list = data["result"]["result"];
+    fs.writeFileSync("./watcha_crawl.json", JSON.stringify(list));
 
-    const $ = cheerio.load(data);
-
-    /*const everything = await Promise.all(
-      $(".css-0")
-        .map(async (i, el) => {
-          const title = $(el).find(".css-1ofozqs a").prop("title");
-          const links = $(el).find(".css-1ofozqs a").prop("href");
-          // const tags = tagLists;
-
-          //   async function fetchPage2() {
-          //     const urls = url + links;
-          //     try {
-          //       const response = await axios.get(urls);
-          //       const data = response.data;
-          //       const $ = cheerio.load(data);
-          //       const authorDetails = $(".author-details").text();
-          //       return authorDetails;
-          //     } catch (err) {
-          //       console.error(err);
-          //     }
-          //   }
-
-          //   const authorDetails = await fetchPage2();
-
-          return {
-            title,
-            links,
-          };
-        })
-        .get()
-    );*/
-
-    // console.log(everything);
+    // console.log(list);
   } catch (err) {
     console.error(err);
   }
